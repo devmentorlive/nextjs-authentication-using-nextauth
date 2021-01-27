@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { signIn, signOut, useSession } from 'next-auth/client';
+
 import { dbConnect, jsonify } from '@/middleware/db';
 import Fighter from '@/models/fighter';
 
@@ -14,37 +16,21 @@ export async function getServerSideProps(context) {
 }
 
 export default function Home({ fighters }) {
-  const [asyncFighters, setAsyncFighters] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    setTimeout(() => {
-      fetch('/api/fighters')
-        .then((res) => res.json())
-        .then((json) => {
-          setAsyncFighters(json);
-          setLoading(false);
-        });
-    }, 1000);
-  }, []);
+  const [session, loading] = useSession();
 
   return (
     <div>
+      <header>
+        {session ? (
+          <button onClick={signOut}>Sign out</button>
+        ) : (
+          <button onClick={signIn}>Sign in</button>
+        )}
+      </header>
       <h1>Here are some MMA fighters</h1>
 
       <ul>
         {fighters.map((fighter) => {
-          return (
-            <li>
-              {fighter.firstName} {fighter.lastName}
-            </li>
-          );
-        })}
-      </ul>
-
-      <ul>
-        {loading && <div>spinner</div>}
-        {asyncFighters.map((fighter) => {
           return (
             <li>
               {fighter.firstName} {fighter.lastName}
